@@ -1,0 +1,12 @@
+.pio/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.wav
+*.log
+.DS_Store
+Thumbs.db
