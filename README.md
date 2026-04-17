@@ -14,7 +14,7 @@ On the ground, a mirror-image ESP32 reads audio from another handheld, demodulat
 
 Two modes are supported at compile time:
 - **MAVLink tunnel** — raw MAVLink frames are carried byte-for-byte.  Full GCS functionality but uses more airtime.
-- **Telemetry summary** — 22-byte compressed struct (GPS, altitude, battery, mode, armed).  ~10× less airtime; suitable for 1 Hz basic telemetry.
+- **Telemetry summary** — 24-byte compressed struct (GPS, altitude, battery, mode, armed).  ~10× less airtime; suitable for 1 Hz basic telemetry.
 
 ---
 

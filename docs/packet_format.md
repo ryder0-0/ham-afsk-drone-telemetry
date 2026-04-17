@@ -43,12 +43,12 @@ All integers are little-endian.  Bits are transmitted LSB-first.  NRZI encoding 
 | Value | Name               | Payload |
 |-------|--------------------|---------|
 | 0x00  | `PKT_TYPE_MAVLINK` | Raw MAVLink v1/v2 frame bytes (tunnel mode). |
-| 0x01  | `PKT_TYPE_TELEM`   | 22-byte `TelemetrySummary` struct (see below). |
+| 0x01  | `PKT_TYPE_TELEM`   | 24-byte `TelemetrySummary` struct (see below). |
 | 0xFF  | `PKT_TYPE_HEARTBEAT` | Empty (len = 0).  Modem keepalive. |
 
 ---
 
-## Telemetry Summary Struct (22 bytes)
+## Telemetry Summary Struct (24 bytes)
 
 ```c
 struct __attribute__((packed)) TelemetrySummary {
@@ -63,7 +63,7 @@ struct __attribute__((packed)) TelemetrySummary {
     uint8_t  flight_mode;  //  1: ArduPilot custom mode
     uint8_t  armed;        //  1: 1 = armed
     int16_t  rssi_est;     //  2: modem RSSI 0–100
-};                          // = 22 bytes total
+};                          // = 24 bytes total
 ```
 
 ---

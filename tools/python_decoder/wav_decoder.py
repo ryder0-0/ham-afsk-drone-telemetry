@@ -99,27 +99,34 @@ def demodulate_samples(samples: np.ndarray, verbose: bool = False):
         tones[i] = current_tone
 
     # Bit clock PLL + NRZI decode
-    decoded_bytes = []
-    bit_phase    = 0
-    prev_tone    = -1
-    byte_accum   = 0
-    bit_in_byte  = 0
+    # Two distinct tone-state variables (mirrors the C++ firmware):
+    #   current_tone      — tone at the previous sample; used for edge detection
+    #   prev_sampled_tone — tone at the last bit-centre sample; used for NRZI decode
+    decoded_bytes     = []
+    bit_phase         = 0
+    current_tone      = -1
+    prev_sampled_tone = -1
+    byte_accum        = 0
+    bit_in_byte       = 0
 
     for i in range(n_samples):
         new_tone = int(tones[i])
 
-        # Detect transition → reset bit clock
-        if new_tone != prev_tone and prev_tone != -1:
+        # Sample-to-sample transition detection → reset bit clock to bit edge
+        transition = (new_tone != current_tone) and (current_tone != -1)
+        current_tone = new_tone
+        if transition:
             bit_phase = 0
 
-        # Sample at centre of bit
+        # Sample at centre of bit (mirrors C++: increment-then-test)
+        bit_phase += 1
         if bit_phase == SAMPLES_PER_BIT // 2:
-            if prev_tone == -1:
+            if prev_sampled_tone == -1:
                 bit = 1
             else:
-                bit = 1 if (new_tone == prev_tone) else 0
+                bit = 1 if (current_tone == prev_sampled_tone) else 0
 
-            prev_tone = new_tone
+            prev_sampled_tone = current_tone
 
             # Accumulate bits LSB-first
             byte_accum |= (bit & 1) << bit_in_byte
@@ -129,7 +136,8 @@ def demodulate_samples(samples: np.ndarray, verbose: bool = False):
                 byte_accum  = 0
                 bit_in_byte = 0
 
-        bit_phase = (bit_phase + 1) % SAMPLES_PER_BIT
+        if bit_phase >= SAMPLES_PER_BIT:
+            bit_phase = 0
 
     if verbose:
         print(f'  Demodulated {n_samples} samples → {len(decoded_bytes)} bytes')
@@ -281,7 +289,7 @@ def render_packet(pkt: dict, verbose: bool):
 
     print(f'  [PKT] seq={seq:3d} type={type_name:16s} len={len(payload):4d}', end='')
 
-    if ptype == PKT_TYPE_TELEM and len(payload) == 22:
+    if ptype == PKT_TYPE_TELEM and len(payload) == 24:
         lat, lon, alt_mm, hdg_cd, spd_cms, batt_mv, batt_pct, sats, mode, armed, rssi = \
             struct.unpack('<iiihhhBBBBh', payload)
         print(f'  lat={lat/1e7:.5f} lon={lon/1e7:.5f} alt={alt_mm/1000:.1f}m '

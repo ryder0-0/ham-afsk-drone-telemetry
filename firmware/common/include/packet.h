@@ -4,22 +4,22 @@
 #include <stddef.h>
 #include "modem_config.h"
 
-// Telemetry summary payload — 22 bytes, sent in PKT_TYPE_TELEM packets.
+// Telemetry summary payload — 24 bytes, sent in PKT_TYPE_TELEM packets.
 // All fields little-endian.
 struct __attribute__((packed)) TelemetrySummary {
-    int32_t  lat_e7;       // latitude  × 1e7 (degrees)
-    int32_t  lon_e7;       // longitude × 1e7 (degrees)
-    int32_t  alt_mm;       // altitude MSL in mm
-    int16_t  heading_cd;   // heading × 100 (centi-degrees)
-    int16_t  speed_cms;    // ground speed cm/s
-    int16_t  batt_mv;      // battery voltage mV
-    uint8_t  batt_pct;     // battery remaining %
-    uint8_t  gps_sats;     // visible satellites
-    uint8_t  flight_mode;  // ArduPilot custom mode byte
-    uint8_t  armed;        // 1 = armed
-    int16_t  rssi_est;     // modem RSSI estimate 0–100
-};
-static_assert(sizeof(TelemetrySummary) == 22, "TelemetrySummary size mismatch");
+    int32_t  lat_e7;       // 4 — latitude  × 1e7 (degrees)
+    int32_t  lon_e7;       // 4 — longitude × 1e7 (degrees)
+    int32_t  alt_mm;       // 4 — altitude MSL in mm
+    int16_t  heading_cd;   // 2 — heading × 100 (centi-degrees)
+    int16_t  speed_cms;    // 2 — ground speed cm/s
+    int16_t  batt_mv;      // 2 — battery voltage mV
+    uint8_t  batt_pct;     // 1 — battery remaining %
+    uint8_t  gps_sats;     // 1 — visible satellites
+    uint8_t  flight_mode;  // 1 — ArduPilot custom mode byte
+    uint8_t  armed;        // 1 — 1 = armed
+    int16_t  rssi_est;     // 2 — modem RSSI estimate 0–100
+};                          // = 24 bytes
+static_assert(sizeof(TelemetrySummary) == 24, "TelemetrySummary size mismatch");
 
 // Full packet (in-memory representation, not wire format).
 struct Packet {
