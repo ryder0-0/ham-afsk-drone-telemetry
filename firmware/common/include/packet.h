@@ -21,6 +21,19 @@ struct __attribute__((packed)) TelemetrySummary {
 };                          // = 24 bytes
 static_assert(sizeof(TelemetrySummary) == 24, "TelemetrySummary size mismatch");
 
+// Audio spectrum frame — 64-byte payload in PKT_TYPE_SPECTRUM packets.
+// Bins span DC → SAMPLE_RATE/2 (0–4800 Hz) over 32 bins ≈ 150 Hz each, so:
+//   bin[8]  ≈ 1200 Hz (MARK tone)
+//   bin[14] ≈ 2200 Hz (SPACE tone)
+// Magnitudes are normalised to UINT16_MAX per frame so the Mac app gets a
+// dimensionless 0..1 waterfall.
+struct __attribute__((packed)) SpectrumFrame {
+    uint32_t millis_stamp;      // firmware uptime in ms at capture time
+    uint16_t bins[SPECTRUM_BIN_COUNT];
+};
+static_assert(sizeof(SpectrumFrame) == 4 + 2 * SPECTRUM_BIN_COUNT,
+              "SpectrumFrame size mismatch");
+
 // Full packet (in-memory representation, not wire format).
 struct Packet {
     uint8_t  type;

@@ -68,11 +68,27 @@
 // Packet type field
 #define PKT_TYPE_MAVLINK    0x00u   // raw MAVLink bytes in payload (tunnel mode)
 #define PKT_TYPE_TELEM      0x01u   // compressed telemetry summary
+#define PKT_TYPE_SPECTRUM   0x02u   // decimated audio spectrum (32-bin Hz FFT mags)
+                                    //   payload: uint16_t fftBins[32]  (64 bytes)
+                                    //   emitted by the receiver at ~4 Hz to let
+                                    //   the Mac app draw a waterfall of the
+                                    //   MARK/SPACE tones for RF tuning.
 #define PKT_TYPE_HEARTBEAT  0xFFu   // modem alive, no MAVLink payload
+
+#define SPECTRUM_BIN_COUNT  32u     // shared between firmware and Mac app
 
 // Compile-time mode switch.  Override in platformio.ini build_flags.
 #ifndef TELEM_MODE_SUMMARY
 #define TELEM_MODE_SUMMARY  0       // 0 = tunnel, 1 = summary
+#endif
+
+// Silence the receiver's ASCII "[RX] ..." diagnostic lines on USB serial.
+// When the receiver's USB port is dedicated to the Mac app (HamTelemetryApp),
+// enabling this gives a pure MAVLink byte stream with no interleaved text,
+// which is easier on the edge of link margin.  Override via PlatformIO
+// build_flags, e.g.  build_flags = -DTELEM_QUIET=1
+#ifndef TELEM_QUIET
+#define TELEM_QUIET         0       // 0 = print diagnostics, 1 = silent
 #endif
 
 // ---------------------------------------------------------------------------

@@ -37,7 +37,9 @@ static void IRAM_ATTR adc_isr() {
 // ---------------------------------------------------------------------------
 void setup() {
     Serial.begin(USB_SERIAL_BAUD);
+#if !TELEM_QUIET
     Serial.println("\n[HAM-AFSK] Receiver starting");
+#endif
 
     // ADC configuration for GPIO34 (ADC1 channel 6)
     // Attenuation 11 dB → full-scale input range 0–3.9 V (effective 0–3.3 V)
@@ -60,7 +62,9 @@ void setup() {
 
     pinMode(GPIO_STATUS_LED, OUTPUT);
 
+#if !TELEM_QUIET
     Serial.println("[RX] ADC timer started, waiting for signal...");
+#endif
 }
 
 void loop() {
@@ -73,11 +77,13 @@ void loop() {
         delay(20);
         digitalWrite(GPIO_STATUS_LED, LOW);
 
+#if !TELEM_QUIET
         Serial.printf("[RX] Packet OK type=0x%02X seq=%u len=%u rssi=%u\n",
                       pkt_decoder.last_packet().type,
                       pkt_decoder.last_packet().seq,
                       pkt_decoder.last_packet().length,
                       pkt_decoder.stats().rssi_last);
+#endif
     }
 
     // Forward decoded MAVLink to GCS + USB serial + print stats
