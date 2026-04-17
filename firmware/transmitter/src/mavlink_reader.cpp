@@ -3,15 +3,19 @@
 #include "crc16.h"
 #include <string.h>
 
-// MAVLink X.25 CRC extra bytes (per message ID, subset we use)
-static const uint8_t MAV_CRC_EXTRA[] = {
-    [MAVMSG_HEARTBEAT]           = 50,
-    [MAVMSG_SYS_STATUS]          = 124,
-    [MAVMSG_GLOBAL_POSITION_INT] = 104,
-    [MAVMSG_VFR_HUD]             = 20,
-};
-static const uint8_t MAV_CRC_EXTRA_MAX =
-    sizeof(MAV_CRC_EXTRA) / sizeof(MAV_CRC_EXTRA[0]);
+// MAVLink X.25 CRC extra byte, per message ID.
+// Subset of the generated MAVLink dialect — add entries if you need more message types.
+// Using a function instead of a designated-initialiser array because GCC C++ mode
+// rejects sparse designators ("non-trivial designated initializers not supported").
+static uint8_t mav_crc_extra(uint8_t msg_id) {
+    switch (msg_id) {
+        case MAVMSG_HEARTBEAT:           return 50;
+        case MAVMSG_SYS_STATUS:          return 124;
+        case MAVMSG_GLOBAL_POSITION_INT: return 104;
+        case MAVMSG_VFR_HUD:             return 20;
+        default:                         return 0;   // unknown msgid → caller treats as no extra
+    }
+}
 
 void MavlinkReader::begin(HardwareSerial &serial) {
     serial_ = &serial;
@@ -93,8 +97,9 @@ void MavlinkReader::process_frame() {
     for (uint16_t i = 1; i < (uint16_t)(MAV_V1_HDR_LEN + payload_len); ++i)
         crc_calc = crc16_ccitt_update(crc_calc, frame_buf_[i]);
 
-    if (msg_id < MAV_CRC_EXTRA_MAX)
-        crc_calc = crc16_ccitt_update(crc_calc, MAV_CRC_EXTRA[msg_id]);
+    uint8_t extra = mav_crc_extra(msg_id);
+    if (extra != 0)
+        crc_calc = crc16_ccitt_update(crc_calc, extra);
 
     uint16_t crc_rx = (uint16_t)frame_buf_[MAV_V1_HDR_LEN + payload_len]
                     | ((uint16_t)frame_buf_[MAV_V1_HDR_LEN + payload_len + 1] << 8u);

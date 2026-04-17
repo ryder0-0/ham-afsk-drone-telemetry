@@ -7,6 +7,7 @@
 #pragma once
 #include <Arduino.h>
 #include "packet_decoder.h"
+#include "afsk_demodulator.h"   // for AFSKDemodulator (used in print_stats)
 
 class MavlinkOutput {
 public:

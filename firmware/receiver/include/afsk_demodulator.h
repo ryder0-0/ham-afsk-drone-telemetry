@@ -17,6 +17,7 @@
 // A value near 50 means no signal; strong signal pushes it towards 100 or 0.
 
 #pragma once
+#include <Arduino.h>      // for IRAM_ATTR
 #include <stdint.h>
 #include "ring_buffer.h"
 #include "packet.h"

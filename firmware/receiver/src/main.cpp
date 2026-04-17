@@ -42,7 +42,8 @@ void setup() {
     // ADC configuration for GPIO34 (ADC1 channel 6)
     // Attenuation 11 dB → full-scale input range 0–3.9 V (effective 0–3.3 V)
     adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11);
+    // ADC_ATTEN_DB_12 (was DB_11 before IDF 5) → full-scale input ~3.1 V
+    adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_12);
 
     demodulator.begin();
     pkt_decoder.begin();

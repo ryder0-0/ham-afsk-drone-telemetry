@@ -45,6 +45,7 @@ static void send_heartbeat() {
 // ---------------------------------------------------------------------------
 // Transmit a raw MAVLink frame in tunnel mode
 // ---------------------------------------------------------------------------
+#if !TELEM_MODE_SUMMARY
 static void send_mavlink_tunnel(const uint8_t *data, uint16_t len) {
     if (len > MAX_PAYLOAD_LEN) {
         Serial.printf("[TX] Frame too large (%u bytes), skipping\n", len);
@@ -63,10 +64,12 @@ static void send_mavlink_tunnel(const uint8_t *data, uint16_t len) {
     Serial.printf("[TX] MAVLink tunnel seq=%u len=%u\n", pkt.seq, len);
     last_tx_ms = millis();
 }
+#endif
 
 // ---------------------------------------------------------------------------
 // Transmit compressed telemetry summary
 // ---------------------------------------------------------------------------
+#if TELEM_MODE_SUMMARY
 static void send_telem_summary(const TelemetrySummary &s) {
     Packet pkt;
     pkt.type   = PKT_TYPE_TELEM;
@@ -84,6 +87,7 @@ static void send_telem_summary(const TelemetrySummary &s) {
                   s.alt_mm / 1000.0f);
     last_tx_ms = millis();
 }
+#endif
 
 // ---------------------------------------------------------------------------
 // Arduino entry points
